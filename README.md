@@ -64,6 +64,16 @@ The table includes official Dutch public holidays. Note that public holidays are
 
 The `IsWerkdag` attribute assumes that all included public holidays are non-working days.
 
+## Contributing
+
+Contributions are welcome!
+
+If you find a bug or have an idea for a new date attribute, please open an Issue.
+
+If you would like to contribute code, fork the repository and submit a Pull Request.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before contributing.
+
 ## License
 
 This project is licensed under the MIT License.
