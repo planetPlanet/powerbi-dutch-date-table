@@ -7,12 +7,26 @@ let
     EindJaar = 2035,
     Cultuur = "nl-NL",
 
+    // Bevrijdingsdag (5 mei) is wettelijk vrij alleen in lustrumjaren (deelbaar door 5),
+    // maar de huidige standaard behandelt het elk jaar als niet-werkdag (oorspronkelijk gedrag).
+    // Zet op true om het alleen in lustrumjaren als niet-werkdag te behandelen.
+    BevrijdingsdagAlleenLustrumjaar = false,
+
+    // Goede Vrijdag is geen officiële Nederlandse feestdag.
+    // De huidige standaard behandelt het als niet-werkdag (oorspronkelijk gedrag).
+    // Zet op true om Goede Vrijdag als werkdag te behandelen.
+    GoedeVrijdagIsWerkdag = false,
+
     // Huidige datum in Nederlandse tijd.
     // Power BI Service gebruikt doorgaans UTC.
     // Europe/Amsterdam kent zomer- en wintertijd.
     // Gebruik daarom een expliciete tijdzonecorrectie.
     NuUTC = DateTimeZone.FixedUtcNow(),
 
+    // DST-berekening: in de EU gaat de klok vooruit op de laatste zondag van maart
+    // om 02:00 lokale wintertijd (= 01:00 UTC) en achteruit op de laatste zondag
+    // van oktober om 03:00 CEST (= 01:00 UTC). Uur 1 (UTC) in ZomerStart en
+    // ZomerEinde is daarom de correcte grenswaarde.
     LaatsteZondag = (Jaar as number, Maand as number) as date =>
         let
             LaatsteDag = Date.EndOfMonth(#date(Jaar, Maand, 1)),
@@ -347,7 +361,23 @@ let
     IsWerkdagToevoegen = Table.AddColumn(
         IsFeestdagToevoegen,
         "IsWerkdag",
-        each not [IsWeekend] and not [IsFeestdag],
+        each
+            let
+                IsUitgesloten =
+                    ([Feestdag] = "Bevrijdingsdag"
+                        and BevrijdingsdagAlleenLustrumjaar
+                        and Number.Mod(Date.Year([Datum]), 5) <> 0)
+                    or
+                    ([Feestdag] = "Goede Vrijdag" and GoedeVrijdagIsWerkdag)
+            in
+                not [IsWeekend] and not ([IsFeestdag] and not IsUitgesloten),
+        type logical
+    ),
+
+    IsSchrikkeldagToevoegen = Table.AddColumn(
+        IsWerkdagToevoegen,
+        "IsSchrikkeldag",
+        each Date.Month([Datum]) = 2 and Date.Day([Datum]) = 29,
         type logical
     ),
 
@@ -368,7 +398,7 @@ let
     },
 
     LogischeKolommen = {
-        "IsWeekend", "IsFeestdag", "IsWerkdag",
+        "IsWeekend", "IsFeestdag", "IsWerkdag", "IsSchrikkeldag",
         "IsVandaag", "IsHuidigeWeek",
         "IsHuidigeMaand", "IsHuidigKwartaal",
         "IsHuidigJaar", "IsGisteren",
@@ -399,7 +429,7 @@ let
         List.Transform(GeheelGetalKolommen, each {_, Int64.Type}),
 
     Datatypes = Table.TransformColumnTypes(
-        IsWerkdagToevoegen,
+        IsSchrikkeldagToevoegen,
         TypeDefinities,
         Cultuur
     ),
