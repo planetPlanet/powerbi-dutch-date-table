@@ -276,12 +276,19 @@ let
             Verwacht = "true",
             Werkelijk = let R = ZoekRij(#date(2024, 2, 29)) in if R = null then "(geen rij)" else Text.Lower(Text.From(R[IsSchrikkeldag]))
         ],
-        // Test 9: 2025 is geen schrikkeljaar — 29 februari bestaat niet
+        // Test 9: 2025 is geen schrikkeljaar — #date(2025, 2, 29) is een ongeldige datum.
+        // Power Query gooit een fout bij het aanmaken van de datumwaarde zelf,
+        // dus we vangen die op met try...otherwise.
         [
             Nr = 9,
             Naam = "2025-02-29: rij bestaat niet",
             Verwacht = "(geen rij)",
-            Werkelijk = let R = ZoekRij(#date(2025, 2, 29)) in if R = null then "(geen rij)" else "rij gevonden"
+            Werkelijk =
+                let
+                    D = try #date(2025, 2, 29) otherwise null
+                in
+                    if D = null then "(geen rij)"
+                    else let R = ZoekRij(D) in if R = null then "(geen rij)" else "rij gevonden"
         ],
         // Test 10: ISO-weeknummer over jaargrens — 30 dec 2024 is week 1 van 2025
         [
