@@ -22,13 +22,14 @@ The date table includes Dutch calendar attributes, public holidays, ISO 8601 wee
 ## Installation
 
 1. Open Power BI Desktop.
-2. Select **Transform data**.
-3. Create a **Blank Query**.
-4. Open the **Advanced Editor**.
-5. Copy the contents of `DateTable_NL.pq`.
-6. Paste the code into the editor.
-7. Adjust `StartJaar` and `EindJaar` if necessary.
-8. Select **Close & Apply**.
+2. Disable **Auto date/time**: go to **File → Options and settings → Options → Data Load → Time intelligence** and uncheck **Auto date/time for new files** and **Auto date/time for the current file**. This prevents Power BI from creating hidden date tables that duplicate this date dimension.
+3. Select **Transform data**.
+4. Create a **Blank Query**.
+5. Open the **Advanced Editor**.
+6. Copy the contents of `DateTable_NL.pq`.
+7. Paste the code into the editor.
+8. Adjust `StartJaar` and `EindJaar` if necessary.
+9. Select **Close & Apply**.
 
 After loading, mark the table as a date table using the `Datum` column.
 
